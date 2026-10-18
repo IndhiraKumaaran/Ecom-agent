@@ -1,0 +1,16 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+pydantic==2.10.6
+pydantic-settings==2.8.1
+SQLAlchemy==2.0.39
+python-dotenv==1.0.1
+langchain==0.3.23
+langchain-core==0.3.86
+langchain-openai==0.3.12
+langgraph==0.3.21
+chromadb==0.6.3
+openai==1.109.1
+posthog==3.25.0
+pandas==2.2.3
+pytest==8.3.5
+httpx==0.28.1

@@ -1,0 +1,1 @@
+"""Catalog-grounded FAQ ingestion and retrieval services."""

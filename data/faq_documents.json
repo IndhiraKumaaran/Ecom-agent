@@ -1,0 +1,82 @@
+[
+  {
+    "faq_id": "warranty-lap-ast-014",
+    "product_id": "LAP-AST-014",
+    "document_type": "warranty",
+    "question": "What warranty is listed for the AsterBook Air 14?",
+    "answer": "Fictional sample FAQ only: the AsterBook Air 14 is listed with 12 months of limited hardware coverage. This is invented demonstration content, not a real manufacturer warranty or legal warranty statement.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "warranty-lap-nvr-015",
+    "product_id": "LAP-NVR-015",
+    "document_type": "warranty",
+    "question": "What warranty is listed for the Nivara WorkPro 15?",
+    "answer": "Fictional sample FAQ only: the Nivara WorkPro 15 is listed with 24 months of limited hardware coverage. This is invented demonstration content, not a real manufacturer warranty or legal warranty statement.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "warranty-lap-orl-016",
+    "product_id": "LAP-ORL-016",
+    "document_type": "warranty",
+    "question": "What warranty is listed for the Oriole Creator 16?",
+    "answer": "Fictional sample FAQ only: the Oriole Creator 16 is listed with 12 months of limited hardware coverage. This is invented demonstration content, not a real manufacturer warranty or legal warranty statement.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "warranty-lap-vlt-013",
+    "product_id": "LAP-VLT-013",
+    "document_type": "warranty",
+    "question": "What warranty is listed for the Veltrix Note 13?",
+    "answer": "Fictional sample FAQ only: the Veltrix Note 13 is listed with 18 months of limited hardware coverage. This is invented demonstration content, not a real manufacturer warranty or legal warranty statement.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "warranty-lap-mrl-014",
+    "product_id": "LAP-MRL-014",
+    "document_type": "warranty",
+    "question": "What warranty is listed for the Marula Flex 14?",
+    "answer": "Fictional sample FAQ only: the Marula Flex 14 is listed with 12 months of limited hardware coverage. This is invented demonstration content, not a real manufacturer warranty or legal warranty statement.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "warranty-lap-cir-015",
+    "product_id": "LAP-CIR-015",
+    "document_type": "warranty",
+    "question": "What warranty is listed for the Cirrus Play 15?",
+    "answer": "Fictional sample FAQ only: the Cirrus Play 15 is listed with 12 months of limited hardware coverage. This is invented demonstration content, not a real manufacturer warranty or legal warranty statement.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "warranty-lap-sol-014",
+    "product_id": "LAP-SOL-014",
+    "document_type": "warranty",
+    "question": "What warranty is listed for the Solstice Book 14?",
+    "answer": "Fictional sample FAQ only: the Solstice Book 14 is listed with 12 months of limited hardware coverage. This is invented demonstration content, not a real manufacturer warranty or legal warranty statement.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "warranty-lap-kes-016",
+    "product_id": "LAP-KES-016",
+    "document_type": "warranty",
+    "question": "What warranty is listed for the Kestrel Studio 16?",
+    "answer": "Fictional sample FAQ only: the Kestrel Studio 16 is listed with 24 months of limited hardware coverage. This is invented demonstration content, not a real manufacturer warranty or legal warranty statement.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "delivery-estimate-sample",
+    "product_id": null,
+    "document_type": "general_faq",
+    "question": "Are catalog delivery estimates guaranteed?",
+    "answer": "Delivery estimates in this fictional catalog are sample estimates in days, not a carrier promise or guaranteed delivery date.",
+    "source": "fictional_faq_documents.json"
+  },
+  {
+    "faq_id": "catalog-currency-sample",
+    "product_id": null,
+    "document_type": "general_faq",
+    "question": "What currency are catalog prices shown in?",
+    "answer": "The fictional catalog lists product prices in Indian rupees (INR).",
+    "source": "fictional_faq_documents.json"
+  }
+]

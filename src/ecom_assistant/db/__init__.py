@@ -1,0 +1,1 @@
+"""Database models and SQLite connection management."""

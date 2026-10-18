@@ -1,0 +1,1 @@
+"""Persistence query boundary for application services."""
