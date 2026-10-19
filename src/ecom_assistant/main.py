@@ -14,6 +14,10 @@ from ecom_assistant.db.init_db import initialize_database
 from ecom_assistant.db.session import Database
 from ecom_assistant.logging_config import configure_logging
 from ecom_assistant.rag.service import FAQService
+from ecom_assistant.services.catalog import CatalogService
+from ecom_assistant.services.cart import CartService
+from ecom_assistant.workflow.graph import ShoppingWorkflow
+from ecom_assistant.workflow.conversation import ConversationWorkflow
 
 logger = getLogger(__name__)
 
@@ -23,6 +27,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application_settings = settings or Settings()
     database = Database(application_settings.database_url)
     faq_service = FAQService.from_settings(application_settings)
+    catalog_service = CatalogService()
+    cart_service = CartService(application_settings, catalog_service)
+    shopping_workflow = ShoppingWorkflow(application_settings, database, catalog_service)
+    conversation_workflow = ConversationWorkflow(
+        application_settings,
+        database,
+        catalog_service,
+        shopping_workflow,
+        cart_service,
+        faq_service,
+    )
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
@@ -52,6 +67,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = application_settings
     app.state.database = database
     app.state.faq_service = faq_service
+    app.state.catalog_service = catalog_service
+    app.state.cart_service = cart_service
+    app.state.shopping_workflow = shopping_workflow
+    app.state.conversation_workflow = conversation_workflow
     app.include_router(api_router)
     app.include_router(health_router)
     return app

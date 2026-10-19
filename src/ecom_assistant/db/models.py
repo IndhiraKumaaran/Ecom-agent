@@ -7,6 +7,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
@@ -88,7 +89,11 @@ class Cart(Base):
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
     confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     items: Mapped[list["CartItem"]] = relationship(
+        back_populates="cart", cascade="all, delete-orphan"
+    )
+    proposals: Mapped[list["CartProposal"]] = relationship(
         back_populates="cart", cascade="all, delete-orphan"
     )
 
@@ -114,6 +119,81 @@ class CartItem(Base):
     unit_price_inr: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     cart: Mapped[Cart] = relationship(back_populates="items")
     product: Mapped[Product] = relationship()
+
+
+class CartProposal(Base):
+    """Persisted simulated cart mutation awaiting explicit customer confirmation."""
+
+    __tablename__ = "cart_proposals"
+    __table_args__ = (
+        CheckConstraint(
+            "operation IN ('add', 'update', 'remove')",
+            name="ck_cart_proposals_operation",
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'applying', 'confirmed', 'expired', 'stale', 'rejected')",
+            name="ck_cart_proposals_status",
+        ),
+        CheckConstraint("quantity >= 0", name="ck_cart_proposals_quantity_nonnegative"),
+        CheckConstraint(
+            "resulting_quantity >= 0",
+            name="ck_cart_proposals_resulting_quantity_nonnegative",
+        ),
+        CheckConstraint(
+            "unit_price_inr > 0",
+            name="ck_cart_proposals_unit_price_positive",
+        ),
+        CheckConstraint(
+            "projected_total_inr >= 0",
+            name="ck_cart_proposals_total_nonnegative",
+        ),
+        Index("ix_cart_proposals_cart_status", "cart_id", "status"),
+    )
+
+    proposal_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    cart_id: Mapped[str] = mapped_column(
+        ForeignKey("carts.cart_id", ondelete="CASCADE"), nullable=False
+    )
+    product_id: Mapped[str] = mapped_column(
+        ForeignKey("products.product_id", ondelete="RESTRICT"), nullable=False
+    )
+    operation: Mapped[str] = mapped_column(String(12), nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    resulting_quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    unit_price_inr: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    projected_total_inr: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    cart_revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    context_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    inventory_quantity: Mapped[int | None] = mapped_column(Integer)
+    inventory_delivery_days: Mapped[int | None] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    cart: Mapped[Cart] = relationship(back_populates="proposals")
+    product: Mapped[Product] = relationship()
+
+
+class ConversationContext(Base):
+    """Minimal, expiring references needed to resolve conversational follow-ups."""
+
+    __tablename__ = "conversation_contexts"
+
+    session_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    active_cart_id: Mapped[str | None] = mapped_column(
+        ForeignKey("carts.cart_id", ondelete="SET NULL"), nullable=True
+    )
+    last_product_ids_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    last_requirements_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    last_proposal_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    last_intent: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class FAQDocument(Base):

@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     faq_embedding_provider: Literal["local_hash", "openai"] = "local_hash"
     faq_embedding_model: str = "text-embedding-3-small"
     faq_chat_model: str = "gpt-4o-mini"
+    cart_proposal_ttl_seconds: int = 300
+    conversation_context_ttl_seconds: int = 3600
 
     @field_validator("app_name")
     @classmethod
@@ -43,6 +45,20 @@ class Settings(BaseSettings):
     def database_must_use_sqlite(cls, value: str) -> str:
         if not value.startswith("sqlite:"):
             raise ValueError("DATABASE_URL must use SQLite in this phase")
+        return value
+
+    @field_validator("cart_proposal_ttl_seconds")
+    @classmethod
+    def proposal_ttl_must_be_bounded(cls, value: int) -> int:
+        if not 30 <= value <= 3600:
+            raise ValueError("CART_PROPOSAL_TTL_SECONDS must be between 30 and 3600")
+        return value
+
+    @field_validator("conversation_context_ttl_seconds")
+    @classmethod
+    def conversation_ttl_must_be_bounded(cls, value: int) -> int:
+        if not 60 <= value <= 86400:
+            raise ValueError("CONVERSATION_CONTEXT_TTL_SECONDS must be between 60 and 86400")
         return value
 
     @model_validator(mode="after")

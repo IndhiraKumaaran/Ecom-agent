@@ -29,7 +29,7 @@ from ecom_assistant.rag.documents import (
     load_source_faqs,
     sync_faq_rows,
 )
-from ecom_assistant.rag.embeddings import LocalHashEmbeddings, content_terms
+from ecom_assistant.rag.embeddings import LocalHashEmbeddings, TOKEN_PATTERN, content_terms
 from ecom_assistant.schemas.faq import (
     FAQAnswerResponse,
     FAQAskRequest,
@@ -296,13 +296,27 @@ class FAQService:
             return extractive_answer, ["Chat model unavailable; returned retrieved source text."]
 
         generated = self._message_text(response.content).strip()
-        allowed_terms = set().union(*(content_terms(text) for text in evidence))
-        allowed_terms |= ANSWER_STOP_WORDS
-        if not generated or content_terms(generated) - allowed_terms:
+        if not generated or not self._is_extractively_supported(generated, evidence):
             return extractive_answer, [
                 "Generated wording was not fully supported; returned exact retrieved source text."
             ]
         return generated, []
+
+    @staticmethod
+    def _is_extractively_supported(answer: str, evidence: list[str]) -> bool:
+        """Accept generated claims only when every token is a source excerpt."""
+        answer_tokens = TOKEN_PATTERN.findall(answer.casefold())
+        if not answer_tokens:
+            return False
+        for source in evidence:
+            source_tokens = TOKEN_PATTERN.findall(source.casefold())
+            window_size = len(answer_tokens)
+            if any(
+                source_tokens[index : index + window_size] == answer_tokens
+                for index in range(len(source_tokens) - window_size + 1)
+            ):
+                return True
+        return False
 
     @staticmethod
     def _message_text(content: Any) -> str:

@@ -17,7 +17,12 @@ class FAQAskRequest(BaseModel):
     @field_validator("question", "product_id")
     @classmethod
     def strip_text(cls, value: str | None) -> str | None:
-        return value.strip() if value is not None else None
+        if value is None:
+            return None
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("text must not be blank")
+        return stripped
 
     @field_validator("question")
     @classmethod

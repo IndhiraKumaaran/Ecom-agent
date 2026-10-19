@@ -62,8 +62,8 @@ def test_catalog_seeding_is_repeatable_and_marks_sample_inventory(tmp_path: Path
     finally:
         database.close()
 
-    assert first_count == second_count == 8
-    assert product_count == inventory_count == 8
+    assert first_count == second_count == 10
+    assert product_count == inventory_count == 10
     assert unavailable is not None
     assert unavailable.stock_quantity == 0
     assert unavailable.data_source == "sample"

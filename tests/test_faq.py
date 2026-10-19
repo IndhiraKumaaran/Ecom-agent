@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -126,7 +127,7 @@ def test_safe_reingestion_updates_changed_documents_and_removes_stale_sources(
 
     assert updated_report.updated_documents == 1
     assert updated_report.deleted_documents == 1
-    assert app.state.faq_service.collection.count() == 8 + len(changed_records)
+    assert app.state.faq_service.collection.count() == 10 + len(changed_records)
     with app.state.database.session() as session:
         seeded_rows = session.scalars(
             select(FAQDocument).where(FAQDocument.document_id.like("seed-faq:%"))
@@ -156,3 +157,74 @@ def test_unknown_product_filter_returns_not_found(faq_client) -> None:
     )
 
     assert response.status_code == 404
+
+
+def test_blank_product_id_is_rejected_as_invalid_input(faq_client) -> None:
+    client, _app = faq_client
+
+    response = client.post(
+        "/api/v1/faq/ask",
+        json={"question": "What processor is listed?", "product_id": "   "},
+    )
+
+    assert response.status_code == 422
+
+
+def test_live_model_cannot_rephrase_evidence_into_an_unsupported_claim(faq_client) -> None:
+    client, app = faq_client
+
+    class UnsupportedChatModel:
+        def invoke(self, _messages):
+            return SimpleNamespace(
+                content="The product does not have 12 months of limited hardware coverage."
+            )
+
+    app.state.faq_service.chat_model = UnsupportedChatModel()
+    response = client.post(
+        "/api/v1/faq/ask",
+        json={
+            "question": "What warranty is listed for this laptop?",
+            "product_id": "LAP-AST-014",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "grounded"
+    assert "Fictional sample FAQ only" in body["answer"]
+    assert any("not fully supported" in warning for warning in body["warnings"])
+
+
+def test_live_model_accepts_a_verbatim_evidence_excerpt(faq_client) -> None:
+    client, app = faq_client
+
+    class VerbatimChatModel:
+        def invoke(self, _messages):
+            return SimpleNamespace(
+                content=(
+                    "Fictional sample FAQ only: the AsterBook Air 14 is listed with "
+                    "12 months of limited hardware coverage."
+                )
+            )
+
+    app.state.faq_service.chat_model = VerbatimChatModel()
+    response = client.post(
+        "/api/v1/faq/ask",
+        json={
+            "question": "What warranty is listed for this laptop?",
+            "product_id": "LAP-AST-014",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "grounded"
+    assert body["answer"].startswith("Fictional sample FAQ only:")
+    assert body["warnings"] == []
+
+
+def test_mock_mode_does_not_construct_a_live_chat_model(faq_client) -> None:
+    _client, app = faq_client
+
+    assert app.state.settings.llm_mode == "mock"
+    assert app.state.faq_service.chat_model is None

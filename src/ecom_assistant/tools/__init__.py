@@ -1,1 +1,1 @@
-"""Focused LangChain tools will be added in a later implementation phase."""
+"""Read-only LangChain tools backed by application services."""

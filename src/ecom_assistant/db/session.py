@@ -58,6 +58,12 @@ class Database:
                         "ADD COLUMN document_type VARCHAR(32) NOT NULL DEFAULT 'faq'"
                     )
                 )
+        cart_columns = {column["name"] for column in inspect(self.engine).get_columns("carts")}
+        if "revision" not in cart_columns:
+            with self.engine.begin() as connection:
+                connection.execute(
+                    text("ALTER TABLE carts ADD COLUMN revision INTEGER NOT NULL DEFAULT 0")
+                )
 
     @contextmanager
     def session(self) -> Iterator[Session]:
